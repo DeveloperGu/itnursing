@@ -2367,10 +2367,10 @@ class _DropdownFieldState extends State<_DropdownField> {
         Container(
           decoration: BoxDecoration(
             color: ITColors.gray100,
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(10),
             border: Border.all(color: ITColors.gray200),
           ),
-          padding: const EdgeInsets.symmetric(horizontal: 14),
+          padding: const EdgeInsets.symmetric(horizontal: 10),
           child: DropdownButton<String>(
             value: _selected,
             isExpanded: true,
