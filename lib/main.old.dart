@@ -1,6 +1,3 @@
-import 'package:aula/global/ITColors.dart';
-import 'package:aula/pages/nurse_page.dart';
-import 'package:aula/widgets/gradient_button_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -12,6 +9,37 @@ void main() {
     ),
   );
   runApp(const ITNursingApp());
+}
+
+// ─── Theme & Colors ───────────────────────────────────────────────────────────
+class ITColors {
+  static const blue900 = Color(0xFF05192F);
+  static const blue800 = Color(0xFF0A2F4F);
+  static const blue700 = Color(0xFF0F5C8D);
+  static const blue500 = Color(0xFF1C7ED6);
+  static const blue100 = Color(0xFFE8F2FB);
+  static const gray900 = Color(0xFF0B2540);
+  static const gray700 = Color(0xFF41536B);
+  static const gray500 = Color(0xFF7C8BA1);
+  static const gray200 = Color(0xFFD9E1EC);
+  static const gray100 = Color(0xFFF5F7FB);
+  static const success = Color(0xFF2F9E44);
+  static const danger = Color(0xFFE03131);
+  static const warning = Color(0xFFF08C00);
+  static const surface = Colors.white;
+  static const surfaceAlt = Color(0xFFF6F9FE);
+
+  static const gradientPrimary = LinearGradient(
+    colors: [blue900, blue700],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+
+  static const gradientAccent = LinearGradient(
+    colors: [blue700, blue500],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
 }
 
 // ─── App Root ─────────────────────────────────────────────────────────────────
@@ -37,14 +65,14 @@ class ITNursingApp extends StatelessWidget {
   }
 }
 
-// ─── Session State (global ou config)────────────────────────────────────────────────────────────
+// ─── Session State ────────────────────────────────────────────────────────────
 class AppSession {
   static String? userRole; // 'enfermeiro', 'paciente', 'admin'
   static String? userName;
   static String? userEmail;
 }
 
-// ─── Splash Screen tela ────────────────────────────────────────────────────────────
+// ─── Splash Screen ────────────────────────────────────────────────────────────
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
   @override
@@ -137,7 +165,7 @@ class _SplashScreenState extends State<SplashScreen>
   }
 }
 
-// ─── Transitions (animations)─────────────────────────────────────────────────────────────
+// ─── Transitions ─────────────────────────────────────────────────────────────
 PageRouteBuilder _slide(Widget page) => PageRouteBuilder(
       pageBuilder: (_, __, ___) => page,
       transitionsBuilder: (_, anim, __, child) => SlideTransition(
@@ -155,7 +183,7 @@ PageRouteBuilder _fade(Widget page) => PageRouteBuilder(
       transitionDuration: const Duration(milliseconds: 300),
     );
 
-// ─── Login Page tela───────────────────────────────────────────────────────────────
+// ─── Login Page ───────────────────────────────────────────────────────────────
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
   @override
@@ -376,7 +404,7 @@ class _LoginPageState extends State<LoginPage>
           AnimatedSwitcher(
             duration: const Duration(milliseconds: 300),
             child: _showCadastro
-                ? EnfermeiroCadastroForm(key: const ValueKey('cad'))
+                ? _CadastroForm(key: const ValueKey('cad'))
                 : _buildLoginForm(),
           ),
         ],
@@ -429,7 +457,7 @@ class _LoginPageState extends State<LoginPage>
               onPressed: () => setState(() => _showPassword = !_showPassword),
             )),
         const SizedBox(height: 20),
-        GradientButton(
+        _GradientButton(
           label: 'Entrar',
           loading: _loading,
           onTap: _doLogin,
@@ -571,7 +599,208 @@ class _QuickLoginHint extends StatelessWidget {
   }
 }
 
-// ─── App Shell (with bottom nav) tela ──────────────────────────────────────────────
+class _CadastroForm extends StatefulWidget {
+  const _CadastroForm({super.key});
+  @override
+  State<_CadastroForm> createState() => _CadastroFormState();
+}
+
+class _CadastroFormState extends State<_CadastroForm> {
+  String _role = 'paciente';
+  final _nomeCtrl = TextEditingController();
+  final _emailCtrl = TextEditingController();
+  final _cpfCtrl = TextEditingController();
+  final _telCtrl = TextEditingController();
+  final _senhaCtrl = TextEditingController();
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const Text('Quero me cadastrar como',
+            style: TextStyle(
+                fontWeight: FontWeight.w600,
+                fontSize: 13,
+                color: ITColors.gray700)),
+        const SizedBox(height: 10),
+        Row(
+          children: ['paciente', 'enfermeiro'].map((r) {
+            final sel = _role == r;
+            return Expanded(
+              child: GestureDetector(
+                onTap: () => setState(() => _role = r),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  margin: const EdgeInsets.only(right: 8),
+                  padding: const EdgeInsets.symmetric(vertical: 10),
+                  decoration: BoxDecoration(
+                    color: sel ? ITColors.blue100 : ITColors.gray100,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                        color: sel ? ITColors.blue500 : ITColors.gray200,
+                        width: sel ? 2 : 1),
+                  ),
+                  child: Center(
+                    child: Text(
+                      r[0].toUpperCase() + r.substring(1),
+                      style: TextStyle(
+                          color: sel ? ITColors.blue700 : ITColors.gray500,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 13),
+                    ),
+                  ),
+                ),
+              ),
+            );
+          }).toList(),
+        ),
+        const SizedBox(height: 16),
+        _field('Nome completo', _nomeCtrl, Icons.person_outline),
+        _field('E-mail', _emailCtrl, Icons.email_outlined),
+        _field('CPF', _cpfCtrl, Icons.badge_outlined),
+        _field('Telefone (WhatsApp)', _telCtrl, Icons.phone_outlined),
+        _field('Senha', _senhaCtrl, Icons.lock_outline, obscure: true),
+        if (_role == 'enfermeiro') ...[
+          const SizedBox(height: 4),
+          _field('COREN', TextEditingController(), Icons.verified_outlined,
+              hint: 'SP-123456'),
+        ],
+        const SizedBox(height: 20),
+        _GradientButton(label: 'Criar conta', onTap: () {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: const Text('Cadastro realizado! Faça login para continuar.'),
+              backgroundColor: ITColors.success,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12)),
+            ),
+          );
+        }),
+      ],
+    );
+  }
+
+  Widget _field(String label, TextEditingController ctrl, IconData icon,
+      {bool obscure = false, String? hint}) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(bottom: 6),
+            child: Text(label,
+                style: const TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 13,
+                    color: ITColors.gray700)),
+          ),
+          Container(
+            decoration: BoxDecoration(
+              color: ITColors.gray100,
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: ITColors.gray200),
+            ),
+            child: TextField(
+              controller: ctrl,
+              obscureText: obscure,
+              style: const TextStyle(fontSize: 14, color: ITColors.gray900),
+              decoration: InputDecoration(
+                hintText: hint ?? label,
+                hintStyle:
+                    const TextStyle(color: ITColors.gray500, fontSize: 13),
+                prefixIcon: Icon(icon, color: ITColors.gray500, size: 20),
+                border: InputBorder.none,
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─── Gradient Button ──────────────────────────────────────────────────────────
+class _GradientButton extends StatefulWidget {
+  final String label;
+  final VoidCallback onTap;
+  final bool loading;
+
+  const _GradientButton(
+      {required this.label, required this.onTap, this.loading = false});
+
+  @override
+  State<_GradientButton> createState() => _GradientButtonState();
+}
+
+class _GradientButtonState extends State<_GradientButton>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _ctrl;
+  late Animation<double> _scale;
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl =
+        AnimationController(vsync: this, duration: const Duration(milliseconds: 120));
+    _scale = Tween(begin: 1.0, end: 0.96)
+        .animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeOut));
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTapDown: (_) => _ctrl.forward(),
+      onTapUp: (_) {
+        _ctrl.reverse();
+        widget.onTap();
+      },
+      onTapCancel: () => _ctrl.reverse(),
+      child: ScaleTransition(
+        scale: _scale,
+        child: Container(
+          height: 52,
+          decoration: BoxDecoration(
+            gradient: ITColors.gradientAccent,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                  color: ITColors.blue500.withOpacity(0.35),
+                  blurRadius: 20,
+                  offset: const Offset(0, 8)),
+            ],
+          ),
+          child: Center(
+            child: widget.loading
+                ? const SizedBox(
+                    width: 22,
+                    height: 22,
+                    child: CircularProgressIndicator(
+                        color: Colors.white, strokeWidth: 2.5))
+                : Text(widget.label,
+                    style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 16,
+                        letterSpacing: 0.3)),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ─── App Shell (with bottom nav) ──────────────────────────────────────────────
 class AppShell extends StatefulWidget {
   final List<Widget> pages;
   final List<BottomNavigationBarItem> items;
@@ -688,7 +917,7 @@ class _AppShellState extends State<AppShell> {
   }
 }
 
-// ─── Enfermeiro Dashboard tela ─────────────────────────────────────────────────────
+// ─── Enfermeiro Dashboard ─────────────────────────────────────────────────────
 class EnfermeiroDashboard extends StatelessWidget {
   const EnfermeiroDashboard({super.key});
 
@@ -792,7 +1021,7 @@ class _EnfermeiroHome extends StatelessWidget {
   }
 }
 
-// ─── Paciente Dashboard tela ───────────────────────────────────────────────────────
+// ─── Paciente Dashboard ───────────────────────────────────────────────────────
 class PacienteDashboard extends StatelessWidget {
   const PacienteDashboard({super.key});
 
@@ -898,7 +1127,7 @@ class _PacienteHome extends StatelessWidget {
   }
 }
 
-// ─── Admin Monitor tela ────────────────────────────────────────────────────────────
+// ─── Admin Monitor ────────────────────────────────────────────────────────────
 class AdminMonitor extends StatelessWidget {
   const AdminMonitor({super.key});
 
@@ -1060,7 +1289,7 @@ class _ConformidadePage extends StatelessWidget {
   }
 }
 
-// ─── Vagas Page tela ───────────────────────────────────────────────────────────────
+// ─── Vagas Page ───────────────────────────────────────────────────────────────
 class VagasPage extends StatefulWidget {
   const VagasPage({super.key});
   @override
@@ -1250,7 +1479,7 @@ class _VagaDetailCard extends StatelessWidget {
   }
 }
 
-// ─── Registrar Vaga tela ───────────────────────────────────────────────────────────
+// ─── Registrar Vaga ───────────────────────────────────────────────────────────
 class RegistrarVagaPage extends StatelessWidget {
   const RegistrarVagaPage({super.key});
 
@@ -1315,7 +1544,7 @@ class RegistrarVagaPage extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 20),
-                GradientButton(label: 'Simular cadastro', onTap: () {
+                _GradientButton(label: 'Simular cadastro', onTap: () {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: const Text('Vaga simulada com sucesso! ✅'),
@@ -1335,7 +1564,7 @@ class RegistrarVagaPage extends StatelessWidget {
   }
 }
 
-// ─── Perfil Page tela ──────────────────────────────────────────────────────────────
+// ─── Perfil Page ──────────────────────────────────────────────────────────────
 class PerfilPage extends StatelessWidget {
   const PerfilPage({super.key});
 
@@ -1437,7 +1666,7 @@ class PerfilPage extends StatelessWidget {
                       hint: 'Curativos, Ventilação mecânica...',
                       icon: Icons.star_outline),
                   const SizedBox(height: 8),
-                  GradientButton(label: 'Salvar perfil', onTap: () {}),
+                  _GradientButton(label: 'Salvar perfil', onTap: () {}),
                 ],
               ),
             ),
@@ -1622,7 +1851,7 @@ class _AssitentePageState extends State<AssistentePage> {
   }
 }
 
-// ─── Reusable Widgets (WIDGETS) ─────────────────────────────────────────────────────────
+// ─── Reusable Widgets ─────────────────────────────────────────────────────────
 class _StatCard extends StatelessWidget {
   final String value;
   final String label;
